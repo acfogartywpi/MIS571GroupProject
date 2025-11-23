@@ -3,24 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/goCheckout_btn"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentRight="false"
-    android:layout_gravity="center_horizontal"
-    android:layout_margin="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginTop="80dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginBottom="16dp"
-    tools:context=".MainActivity"
-    android:layout_alignParentEnd="false"
-    android:layout_alignParentStart="true">
+    tools:context=".GroupActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -32,21 +19,22 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
     </com.google.android.material.appbar.AppBarLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_margin="16dp"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
+
     <LinearLayout
-        android:layout_width="336dp"
-        android:layout_height="487dp"
-        android:gravity="end|center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="visible"
-        tools:visibility="visible">
+        android:padding="16dp"
+        android:gravity="center_horizontal">
 
         <TextView
             android:id="@+id/checkoutreturn_textView"
@@ -54,23 +42,49 @@
             android:layout_height="wrap_content"
             android:text="@string/welcome"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:gravity="center_horizontal"/>
 
+        <!-- Browse Data Button -->
         <Button
-            android:id="@+id/goCheckOut_btn"
+            android:id="@+id/goBrowseData_btn"
             android:layout_width="200dp"
             android:layout_height="50dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="80dp"
-            android:baselineAligned="false"
-            android:text="@string/goCheckOut_btn" />
+            android:layout_marginTop="40dp"
+            android:text="Browse Data" />
 
+        <!-- Query Button -->
         <Button
             android:id="@+id/goDoQuery_btn"
             android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="100dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
             android:text="@string/goDoQuery_btn" />
+
+        <!-- Dropdown for tables -->
+        <Spinner
+            android:id="@+id/tableSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:visibility="gone"/>
+
+        <!-- Show Table Button -->
+        <Button
+            android:id="@+id/showTableBtn"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:text="Show Table"
+            android:visibility="gone" />
+
+        <!-- TextView to display table content -->
+        <TextView
+            android:id="@+id/tableDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:scrollbars="vertical"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
