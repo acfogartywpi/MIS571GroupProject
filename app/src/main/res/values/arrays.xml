@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="query_array">
-        <item>Query 1</item>
-        <item>Query 2</item>
-        <item>Query 3</item>
-        <item>Query 4</item>
-        <item>Query 5</item>
-        <item>Query 6</item>
-        <item>Query 7</item>
+        <item>Seller Average Review Score</item>
+        <item>Top 2 Product Categories by Month</item>
+        <item>Best and Worst Product Categories by State</item>
+        <item>Average Delivery Time by Seller</item>
+        <item>Sales and Orders by State</item>
+        <item>Delivery Speed vs Review Score</item>
+        <item>Customers with Multiple Orders</item>
+        <item>Average Order Value by Product Category</item>
+        <item>Average Review Score by Product Category</item>
+        <item>Total Revenue by Seller</item>
+        <item>Average Delivery Time by State</item>
+        <item>Order Counts by Hour of Day</item>
+        <item>Total Customers by State</item>
     </string-array>
 </resources>
