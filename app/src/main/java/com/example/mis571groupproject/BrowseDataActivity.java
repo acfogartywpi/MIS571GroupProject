@@ -33,12 +33,12 @@ public class BrowseDataActivity extends Activity implements View.OnClickListener
 
         tableSpinner = findViewById(R.id.tableSpinner);
         showTableBtn = findViewById(R.id.showTableBtn);
-        summaryBtn = findViewById(R.id.summary_btn);
+//        summaryBtn = findViewById(R.id.summary_btn);
         tableDisplay = findViewById(R.id.tableDisplay);
         goBackBtn = findViewById(R.id.goback_btn);
 
         showTableBtn.setOnClickListener(this);
-        summaryBtn.setOnClickListener(this);
+//        summaryBtn.setOnClickListener(this);
         goBackBtn.setOnClickListener(this);
 
         try {
@@ -76,27 +76,27 @@ public class BrowseDataActivity extends Activity implements View.OnClickListener
         if (id == R.id.showTableBtn) {
             String tableName = tableSpinner.getSelectedItem().toString();
             displayTable(tableName);
-        } else if (id == R.id.summary_btn) {
-            String tableName = tableSpinner.getSelectedItem().toString();
-            if ("CheckOut".equals(tableName)) {
-                ArrayList<Pair> pairList = new ArrayList<>();
-                Cursor c = db.rawQuery(
-                        "SELECT month, count(*) FROM CheckOut GROUP BY month", null);
-                if (c.moveToFirst()) {
-                    do {
-                        int month = c.getInt(0); // assumes month is stored as integer 1-12
-                        double count = c.getDouble(1);
-                        pairList.add(new Pair(month, count));
-                    } while (c.moveToNext());
-                }
-                c.close();
-
-                Intent chartIntent = ChartGenerator.getBarChart(
-                        this, "CheckOuts per Month", pairList);
-                startActivity(chartIntent);
-            } else {
-                tableDisplay.setText("Chart summary is only available for the CheckOut table.");
-            }
+////        } else if (id == R.id.summary_btn) {
+////            String tableName = tableSpinner.getSelectedItem().toString();
+////            if ("CheckOut".equals(tableName)) {
+////                ArrayList<Pair> pairList = new ArrayList<>();
+////                Cursor c = db.rawQuery(
+////                        "SELECT month, count(*) FROM CheckOut GROUP BY month", null);
+////                if (c.moveToFirst()) {
+////                    do {
+////                        int month = c.getInt(0); // assumes month is stored as integer 1-12
+////                        double count = c.getDouble(1);
+////                        pairList.add(new Pair(month, count));
+////                    } while (c.moveToNext());
+////                }
+////                c.close();
+////
+////                Intent chartIntent = ChartGenerator.getBarChart(
+////                        this, "CheckOuts per Month", pairList);
+////                startActivity(chartIntent);
+//            } else {
+//                tableDisplay.setText("Chart summary is only available for the CheckOut table.");
+//            }
         } else if (id == R.id.goback_btn) {
             Intent intent = new Intent(this, GroupActivity.class);
             startActivity(intent);
