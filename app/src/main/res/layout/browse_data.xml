@@ -13,6 +13,13 @@
         android:visibility="visible"/>
 
     <Button
+        android:id="@+id/summary_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Summary"
+        android:layout_marginTop="16dp"/>
+
+    <Button
         android:id="@+id/showTableBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

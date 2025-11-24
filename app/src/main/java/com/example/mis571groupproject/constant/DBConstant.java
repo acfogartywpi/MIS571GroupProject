@@ -9,7 +9,7 @@ public abstract class DBConstant
     public static String DATABASE_PATH =
             "/data/data/com.example.mis571groupproject/databases";
     //database file name
-    public static String DATABASE_FILE = "library.db";
+    public static String DATABASE_FILE = "Brazilian_Ecommerce.db";
     //database version
     public static int DATABASE_VERSION = 1;
 }
