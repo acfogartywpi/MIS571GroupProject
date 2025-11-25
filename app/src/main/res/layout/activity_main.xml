@@ -86,5 +86,26 @@
             android:layout_marginTop="16dp"
             android:scrollbars="vertical"
             android:visibility="gone"/>
+
+        <!-- Top 5 Reviewed Products (Green Chart) -->
+        <LinearLayout
+            android:id="@+id/chartTopReviews"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginTop="24dp"
+            android:background="#E8F5E9" />
+
+        <!-- Bottom 5 Reviewed Products (Red Chart) -->
+        <LinearLayout
+            android:id="@+id/chartBottomReviews"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginTop="24dp"
+            android:background="#FFEBEE" />
+
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
