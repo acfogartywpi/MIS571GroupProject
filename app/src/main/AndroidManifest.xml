@@ -26,6 +26,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".BrowseDataActivity" />
         <activity android:name="org.achartengine.GraphicalActivity" />
+        <activity android:name=".ChartActivity" />
 
     </application>
 </manifest>
