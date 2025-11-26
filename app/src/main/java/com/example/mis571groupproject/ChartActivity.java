@@ -1,20 +1,17 @@
 package com.example.mis571groupproject;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mis571groupproject.constant.SQLCommand;
 import com.example.mis571groupproject.util.DBOperator;
-import com.example.mis571groupproject.view.TableView;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -27,17 +24,23 @@ import org.achartengine.renderer.XYSeriesRenderer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryActivity extends Activity implements View.OnClickListener {
+public class ChartActivity extends Activity {
 
-    Button backBtn, resultBtn, chartPageBtn;
-    Spinner querySpinner;
-    ScrollView scrollView;
-    LinearLayout resultsContainer;
+    private LinearLayout chartContainer;
+    private TextView chartTitleView;
+    private Button backBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.query);
+        setContentView(R.layout.chart_page);
+
+        chartContainer = findViewById(R.id.chart_container);
+        chartTitleView = findViewById(R.id.chart_title);
+        backBtn = findViewById(R.id.chart_back_btn);
+
+        // Back button returns to QueryActivity
+        backBtn.setOnClickListener(v -> finish());
 
         // Make sure DB is copied
         try {
@@ -46,104 +49,51 @@ public class QueryActivity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         }
 
-        backBtn = findViewById(R.id.goback_btn);
-        resultBtn = findViewById(R.id.showresult_btn);
-        chartPageBtn = findViewById(R.id.viewchart_btn); // NEW BUTTON
-        querySpinner = findViewById(R.id.querylist_spinner);
-        scrollView = findViewById(R.id.scrollview_queryresults);
-        resultsContainer = findViewById(R.id.results_container);
+        int pos = getIntent().getIntExtra("query_pos", -1);
+        String title = getIntent().getStringExtra("query_title");
+        if (title == null) title = "Chart";
 
-        backBtn.setOnClickListener(this);
-        resultBtn.setOnClickListener(this);
-        chartPageBtn.setOnClickListener(this); // NEW CLICK LISTENER
-    }
+        chartTitleView.setText(title);
 
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-
-        if (id == R.id.showresult_btn) {
-            runSelectedQuery();
-
-        } else if (id == R.id.goback_btn) {
-            startActivity(new Intent(this, GroupActivity.class));
-
-        } else if (id == R.id.viewchart_btn) {
-            openChartPageForSelectedQuery(); // NEW ACTION
-        }
-    }
-
-    /** NEW: Opens ChartActivity with the selected query */
-    private void openChartPageForSelectedQuery() {
-        int pos = querySpinner.getSelectedItemPosition();
-        if (pos == Spinner.INVALID_POSITION) {
-            Toast.makeText(this, "Please choose a query first!", Toast.LENGTH_SHORT).show();
+        if (pos == -1) {
+            Toast.makeText(this, "No query selected.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        String title = querySpinner.getSelectedItem().toString();
+        String sql = getSqlForPosition(pos);
+        if (sql == null || sql.isEmpty()) {
+            Toast.makeText(this, "No SQL defined for this query.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        Intent intent = new Intent(this, ChartActivity.class);
-        intent.putExtra("query_pos", pos);
-        intent.putExtra("query_title", title);
-        startActivity(intent);
-    }
+        Log.d("ChartActivity", "Executing SQL: " + sql);
 
-    /** Original: runs chart + table in the scroll area */
-    private void runSelectedQuery() {
+        Cursor cursor = null;
         try {
-            int pos = querySpinner.getSelectedItemPosition();
-            if (pos == Spinner.INVALID_POSITION) {
-                Toast.makeText(this, "Please choose a query!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            cursor = DBOperator.getInstance().execQuery(sql);
+            if (cursor != null && cursor.moveToFirst()) {
+                GraphicalView chartView = buildChartFromCursor(cursor, title);
 
-            // Clear old chart + table
-            resultsContainer.removeAllViews();
-
-            String sql = getSqlForPosition(pos);
-            if (sql.isEmpty()) {
-                Toast.makeText(this, "Invalid SQL for this query.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            Log.d("QueryActivity", "Executing SQL: " + sql);
-            String chartTitle = querySpinner.getSelectedItem().toString();
-
-            // 1) Build chart
-            Cursor chartCursor = DBOperator.getInstance().execQuery(sql);
-            if (chartCursor != null && chartCursor.moveToFirst()) {
-                GraphicalView chartView = buildChartFromCursor(chartCursor, chartTitle);
-
-                // Give chart a visible size
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        (int)(300 * getResources().getDisplayMetrics().density)
+                        (int) (300 * getResources().getDisplayMetrics().density)
                 );
-                lp.setMargins(16,16,16,16);
+                lp.setMargins(16, 16, 16, 16);
                 chartView.setLayoutParams(lp);
 
-                resultsContainer.addView(chartView);
-                chartCursor.close();
+                chartContainer.addView(chartView);
             } else {
-                Toast.makeText(this, "No data available for chart.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No data available for this chart.", Toast.LENGTH_LONG).show();
             }
-
-            // 2) Build table
-            Cursor tableCursor = DBOperator.getInstance().execQuery(sql);
-            if (tableCursor != null) {
-                TableView tableView = new TableView(this, tableCursor);
-                resultsContainer.addView(tableView);
-                // TableView closes cursor internally
-            }
-
         } catch (Exception e) {
-            Log.e("QueryActivity", "Error executing query", e);
-            Toast.makeText(this, "Error while showing results. Check logs.", Toast.LENGTH_LONG).show();
+            Log.e("ChartActivity", "Error building chart", e);
+            Toast.makeText(this, "Error building chart. Check logs.", Toast.LENGTH_LONG).show();
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 
-    /** Map spinner index → SQL command */
+    // Same mapping as QueryActivity
     private String getSqlForPosition(int pos) {
         switch (pos) {
             case 0:  return SQLCommand.QUERY_1;
@@ -163,9 +113,8 @@ public class QueryActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    /** Build a bar chart from SQL result */
+    // Same chart builder as in QueryActivity
     private GraphicalView buildChartFromCursor(Cursor cursor, String title) {
-
         XYSeries series = new XYSeries(title);
         List<String> labels = new ArrayList<>();
 
@@ -187,7 +136,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
             try {
                 value = cursor.getDouble(valueIndex);
             } catch (Exception e) {
-                continue; // skip non-numeric data
+                continue;
             }
 
             if (label != null && label.length() > 12) {
@@ -202,7 +151,6 @@ public class QueryActivity extends Activity implements View.OnClickListener {
             }
 
             xIndex++;
-
         } while (cursor.moveToNext());
 
         XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
