@@ -30,7 +30,7 @@ import java.util.List;
 
 public class QueryActivity extends Activity implements View.OnClickListener {
 
-    Button backBtn, resultBtn, chartPageBtn;
+    Button backBtn, resultBtn;
     Spinner querySpinner;
     ScrollView scrollView;
     LinearLayout resultsContainer;
