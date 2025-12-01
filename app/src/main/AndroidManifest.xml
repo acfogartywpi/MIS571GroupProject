@@ -25,7 +25,8 @@
         <activity android:name=".QueryActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".BrowseDataActivity" />
-        <activity android:name="org.achartengine.GraphicalActivity" />/>
+        <activity android:name="org.achartengine.GraphicalActivity" />
+        <activity android:name=".view.ChartActivity" />
 
     </application>
 </manifest>
