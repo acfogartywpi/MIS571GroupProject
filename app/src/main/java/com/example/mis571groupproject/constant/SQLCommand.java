@@ -36,23 +36,17 @@ public abstract class SQLCommand
                     "    JOIN Product p ON oi.Product_id = p.Product_id " +
                     "    JOIN Product_Translation pt ON p.Product_category_name = pt.Product_category_name " +
                     "    GROUP BY month_num, category " +
-                    "), " +
-                    "ranked AS ( " +
-                    "    SELECT " +
-                    "        month_num, " +
-                    "        month_name, " +
-                    "        category, " +
-                    "        total_sales, " +
-                    "        ROW_NUMBER() OVER ( " +
-                    "            PARTITION BY month_num " +
-                    "            ORDER BY total_sales DESC " +
-                    "        ) AS rn " +
-                    "    FROM monthly_revenue " +
                     ") " +
-                    "SELECT month_name AS month, category, total_sales " +
-                    "FROM ranked " +
-                    "WHERE rn IN (1, 2) " +
-                    "ORDER BY month_num, rn;";
+                    "SELECT mr.month_name AS month, mr.category, mr.total_sales " +
+                    "FROM monthly_revenue mr " +
+                    "WHERE ( " +
+                    "    SELECT COUNT(*) " +
+                    "    FROM monthly_revenue mr2 " +
+                    "    WHERE mr2.month_num = mr.month_num " +
+                    "      AND mr2.total_sales > mr.total_sales " +
+                    ") < 2 " +
+                    "ORDER BY mr.month_num, mr.total_sales DESC;";
+
 
     public static String QUERY_3 =
             "WITH state_sales AS ( " +
@@ -66,26 +60,22 @@ public abstract class SQLCommand
                     "    JOIN Product p ON oi.Product_id = p.Product_id " +
                     "    JOIN Product_Translation pt ON p.Product_category_name = pt.Product_category_name " +
                     "    GROUP BY state, category " +
-                    "), " +
-                    "ranked AS ( " +
-                    "    SELECT " +
-                    "        state, " +
-                    "        category, " +
-                    "        total_sales, " +
-                    "        ROW_NUMBER() OVER ( " +
-                    "            PARTITION BY state " +
-                    "            ORDER BY total_sales DESC " +
-                    "        ) AS best_rank, " +
-                    "        ROW_NUMBER() OVER ( " +
-                    "            PARTITION BY state " +
-                    "            ORDER BY total_sales ASC " +
-                    "        ) AS worst_rank " +
-                    "    FROM state_sales " +
                     ") " +
                     "SELECT state, category, total_sales " +
-                    "FROM ranked " +
-                    "WHERE best_rank = 1 OR worst_rank = 1 " +
-                    "ORDER BY state, CASE WHEN best_rank = 1 THEN 1 ELSE 2 END;";
+                    "FROM state_sales as ss " +
+                    "WHERE ( " +
+                    "    SELECT COUNT(*)" +
+                    "    FROM state_sales ss2 " +
+                    "    WHERE ss2.state = ss.state " +
+                    "      AND ss2.total_sales > ss.total_sales " +
+                    ") < 1 " +
+                    "OR ( " +
+                    "    SELECT COUNT(*) " +
+                    "    FROM state_sales ss3 " +
+                    "    WHERE ss3.state = ss.state " +
+                    "      AND ss3.total_sales < ss.total_sales " +
+                    ") < 1 " +
+                    "ORDER BY ss.state;";
 
     public static String QUERY_4 =
             "WITH delivery_times AS ( " +
@@ -244,7 +234,7 @@ public abstract class SQLCommand
                     "SELECT time_of_day, COUNT(*) AS total_orders " +
                     "FROM formatted " +
                     "GROUP BY time_of_day, hour_24 " +
-                    "ORDER BY total_orders DESC;";
+                    "ORDER BY hour_24 ASC;";
 
     public static String QUERY_13 =
             "SELECT Customer_state AS state, " +
