@@ -8,6 +8,7 @@
     tools:context=".GroupActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -17,7 +18,21 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/homeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Phone App for the Olist Database"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:layout_marginBottom="2dp"
+                android:textStyle="bold"/>
+
+        </androidx.appcompat.widget.Toolbar>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -31,19 +46,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="786dp"
+        android:layout_marginTop="32dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center_horizontal">
-
-        <TextView
-            android:id="@+id/checkoutreturn_textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/welcome"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:gravity="center_horizontal"/>
+        android:padding="42dp">
 
         <!-- Browse Data Button -->
         <Button
@@ -67,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <!-- Show Table Button -->
         <Button
@@ -85,8 +92,19 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:scrollbars="vertical"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/checkoutreturn_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="@string/welcome"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_anchor="@+id/appBarLayout"
+        app:layout_anchorGravity="center" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
