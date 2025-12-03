@@ -73,10 +73,10 @@ public class ChartActivity extends Activity {
                         chartView = QueryActivity.buildQuery7CustomerOrdersChart(this, cursor);
                         break;
                     case 7:
-                        chartView = QueryActivity.buildQuery8BinnedCategoryValueChart(this, cursor);
+                        chartView = QueryActivity.buildQuery8TopBottomCategoryChart(this, cursor);
                         break;
                     case 8:
-                        chartView = QueryActivity.buildQuery9BinnedCategoryReviewChart(this, cursor);
+                        chartView = QueryActivity.buildQuery9TopBottomCategoryChart(this, cursor);
                         break;
                     case 9:
                         chartView = QueryActivity.buildQuery10BinnedSellerRevenueChart(this, cursor);

@@ -154,11 +154,11 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
                 }else if (pos == 7) {
                     //Query 8: bin product category by order value
-                    chartView = buildQuery8BinnedCategoryValueChart(this, chartCursor);
+                    chartView = buildQuery8TopBottomCategoryChart(this, chartCursor);
 
                 }else if (pos == 8) {
                     //Query 9: bin product category by average review score
-                    chartView = buildQuery9BinnedCategoryReviewChart(this, chartCursor);
+                    chartView = buildQuery9TopBottomCategoryChart(this, chartCursor);
 
                 }else if (pos == 9) {
                     //Query 10: show top 10 + bottom 10 revenue by seller
@@ -334,6 +334,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Special chart for QUERY_1
+     * average review scores by seller
      */
     public static GraphicalView buildQuery1ReviewHistogram(Context context, Cursor cursor) {
 
@@ -428,6 +429,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Custom chart for QUERY_2:
+     * To product categories by sales and by month
      */
     public static GraphicalView buildQuery2CategoryChart(Context context, Cursor cursor) {
 
@@ -516,11 +518,17 @@ public class QueryActivity extends Activity implements View.OnClickListener {
         topRenderer.setDisplayChartValues(false);
         topRenderer.setChartValuesTextSize(20f);
         topRenderer.setColor(Color.BLUE);
+        topRenderer.setAnnotationsColor(Color.BLACK);
+        topRenderer.setAnnotationsTextSize(20f);
+        topRenderer.setAnnotationsTextAlign(Paint.Align.CENTER);
 
         XYSeriesRenderer secondRenderer = new XYSeriesRenderer();
         secondRenderer.setDisplayChartValues(false);
         secondRenderer.setChartValuesTextSize(20f);
         secondRenderer.setColor(Color.GREEN);
+        secondRenderer.setAnnotationsColor(Color.BLACK);
+        secondRenderer.setAnnotationsTextSize(20f);
+        secondRenderer.setAnnotationsTextAlign(Paint.Align.CENTER);
 
         renderer.addSeriesRenderer(topRenderer);
         renderer.addSeriesRenderer(secondRenderer);
@@ -535,6 +543,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Custom chart for QUERY_3:
+     * best and worst product categories by state
      */
     public static GraphicalView buildQuery3CategoryChart(Context context, Cursor cursor) {
 
@@ -657,6 +666,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
     }
     /**
      * Custom chart for QUERY_4:
+     * seller avg. delivery time
      */
     public static GraphicalView buildQuery4DeliveryHistogram(Context context, Cursor cursor) {
 
@@ -748,6 +758,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Custom chart for QUERY_5:
+     * Total sales and orders by state
      */
     public static GraphicalView buildQuery5SalesOrdersChart(Context context, Cursor cursor) {
 
@@ -893,6 +904,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Custom chart for QUERY 7:
+     * Orders by hour of day
      */
 
     public static GraphicalView buildQuery7CustomerOrdersChart(Context context, Cursor cursor) {
@@ -975,6 +987,9 @@ public class QueryActivity extends Activity implements View.OnClickListener {
         );
     }
 
+    /**
+     * Custom chart for QUERY 7:
+     */
     public static GraphicalView buildQuery12HourlyChart(Context context, Cursor cursor) {
 
         XYSeries series = new XYSeries("Total Orders");
@@ -1064,9 +1079,128 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Custom chart for QUERY_8:
-     * Bins product categories by total order value.
+     * Top + bottom 10 product categories by total order value.
      */
-    public static GraphicalView buildQuery8BinnedCategoryValueChart(Context context, Cursor cursor) {
+    public static GraphicalView buildQuery8TopBottomCategoryChart(Context context, Cursor cursor) {
+
+        int nameIndex = 0;
+        int valueIndex = cursor.getColumnCount() - 1;
+
+        if (valueIndex < 0) {
+            cursor.moveToFirst();
+            return buildChartFromCursor(context, cursor, "Top/Bottom Product Categories");
+        }
+
+        java.util.List<java.util.Map.Entry<String, Double>> rows = new java.util.ArrayList<>();
+
+        do {
+            try {
+                String category = cursor.getString(nameIndex);
+                double value = cursor.getDouble(valueIndex);
+
+                if (category == null) category = "(Unknown)";
+                rows.add(new java.util.AbstractMap.SimpleEntry<>(category, value));
+
+            } catch (Exception ignored) {}
+        } while (cursor.moveToNext());
+
+        if (rows.isEmpty()) {
+            cursor.moveToFirst();
+            return buildChartFromCursor(context, cursor, "Top/Bottom Product Categories");
+        }
+
+        java.util.Collections.sort(rows, (a, b) ->
+                Double.compare(b.getValue(), a.getValue())
+        );
+
+        int total = rows.size();
+        int topCount = Math.min(10, total);
+        int bottomCount = Math.min(10, total - topCount);
+
+        XYSeries topSeries = new XYSeries("Top 10");
+        XYSeries bottomSeries = new XYSeries("Bottom 10");
+        java.util.List<String> labels = new java.util.ArrayList<>();
+
+        double maxY = 0;
+        int xIndex = 0;
+
+        for (int i = 0; i < topCount; i++) {
+            String cat = rows.get(i).getKey();
+            double val = rows.get(i).getValue();
+
+            labels.add(cat);
+            topSeries.add(xIndex, val);
+
+            if (val > maxY) maxY = val;
+            xIndex++;
+        }
+
+        int startBottom = total - bottomCount;
+        for (int i = startBottom; i < total; i++) {
+            String cat = rows.get(i).getKey();
+            double val = rows.get(i).getValue();
+
+            labels.add(cat);
+            bottomSeries.add(xIndex, val);
+
+            if (val > maxY) maxY = val;
+            xIndex++;
+        }
+
+        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
+        dataset.addSeries(topSeries);
+        dataset.addSeries(bottomSeries);
+
+        XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
+        renderer.setChartTitle("Top 10 & Bottom 10 Product Categories by Value");
+        renderer.setChartTitleTextSize(38f);
+        renderer.setLabelsTextSize(22f);
+        renderer.setLegendTextSize(26f);
+        renderer.setMargins(new int[]{80, 120, 220, 40});
+        renderer.setShowGrid(true);
+        renderer.setZoomButtonsVisible(false);
+        renderer.setPanEnabled(true, false);
+
+        renderer.setBarWidth(25);
+        renderer.setBarSpacing(4);
+
+        renderer.setXLabels(0);
+        for (int i = 0; i < labels.size(); i++) {
+            renderer.addXTextLabel(i, labels.get(i));
+        }
+        renderer.setXLabelsAngle(90f);
+        renderer.setXLabelsPadding(150f);
+
+        renderer.setXAxisMin(-0.8);
+        renderer.setXAxisMax(labels.size() - 0.2);
+
+        renderer.setYAxisMin(0);
+        renderer.setYAxisMax(maxY * 1.15);
+        renderer.setYLabelsPadding(40f);
+
+        XYSeriesRenderer topRenderer = new XYSeriesRenderer();
+        topRenderer.setColor(Color.GREEN);
+        topRenderer.setDisplayChartValues(false);
+        topRenderer.setChartValuesTextSize(24f);
+
+        XYSeriesRenderer bottomRenderer = new XYSeriesRenderer();
+        bottomRenderer.setColor(Color.RED);
+        bottomRenderer.setDisplayChartValues(false);
+        bottomRenderer.setChartValuesTextSize(24f);
+
+        renderer.addSeriesRenderer(topRenderer);
+        renderer.addSeriesRenderer(bottomRenderer);
+
+        return ChartFactory.getBarChartView(
+                context,
+                dataset,
+                renderer,
+                BarChart.Type.DEFAULT
+        );
+    }
+
+
+    /*public static GraphicalView buildQuery8BinnedCategoryValueChart(Context context, Cursor cursor) {
 
         int valueIndex = cursor.getColumnCount() - 1;
         if (valueIndex < 0) {
@@ -1172,13 +1306,136 @@ public class QueryActivity extends Activity implements View.OnClickListener {
                 renderer,
                 BarChart.Type.DEFAULT
         );
-    }
+    }*/
 
     /**
      * Custom chart for QUERY_9:
-     * Bins product categories by average review score.
+     * Tp + bottom 10 product categories by average review score.
      */
-    public static GraphicalView buildQuery9BinnedCategoryReviewChart(Context context, Cursor cursor) {
+    public static GraphicalView buildQuery9TopBottomCategoryChart(Context context, Cursor cursor) {
+
+        int nameIndex = 0;
+        int valueIndex = cursor.getColumnIndex("avg_review_score");
+        if (valueIndex == -1) {
+            valueIndex = cursor.getColumnCount() - 1;
+        }
+
+        if (valueIndex < 0) {
+            cursor.moveToFirst();
+            return buildChartFromCursor(context, cursor, "Top/Bottom Product Categories by Review Score");
+        }
+
+        java.util.List<java.util.Map.Entry<String, Double>> rows = new java.util.ArrayList<>();
+
+        do {
+            try {
+                String category = cursor.getString(nameIndex);
+                double value = cursor.getDouble(valueIndex);
+
+                if (category == null) category = "(Unknown)";
+                rows.add(new java.util.AbstractMap.SimpleEntry<>(category, value));
+
+            } catch (Exception ignored) { }
+        } while (cursor.moveToNext());
+
+        if (rows.isEmpty()) {
+            cursor.moveToFirst();
+            return buildChartFromCursor(context, cursor, "Top/Bottom Product Categories by Review Score");
+        }
+
+        java.util.Collections.sort(rows, (a, b) ->
+                Double.compare(b.getValue(), a.getValue())
+        );
+
+        int total = rows.size();
+        int topCount = Math.min(10, total);
+        int bottomCount = Math.min(10, total - topCount);
+
+        XYSeries topSeries = new XYSeries("Top 10");
+        XYSeries bottomSeries = new XYSeries("Bottom 10");
+        java.util.List<String> labels = new java.util.ArrayList<>();
+
+        double maxY = 0;
+        int xIndex = 0;
+
+        for (int i = 0; i < topCount; i++) {
+            String cat = rows.get(i).getKey();
+            double val = rows.get(i).getValue();
+
+            labels.add(cat);
+            topSeries.add(xIndex, val);
+
+            if (val > maxY) maxY = val;
+            xIndex++;
+        }
+
+        int startBottom = total - bottomCount;
+        for (int i = startBottom; i < total; i++) {
+            String cat = rows.get(i).getKey();
+            double val = rows.get(i).getValue();
+
+            labels.add(cat);
+            bottomSeries.add(xIndex, val);
+
+            if (val > maxY) maxY = val;
+            xIndex++;
+        }
+
+        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
+        dataset.addSeries(topSeries);
+        dataset.addSeries(bottomSeries);
+
+        XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
+        renderer.setChartTitle("Top 10 & Bottom 10 Categories by Avg Review Score");
+        renderer.setChartTitleTextSize(38f);
+        renderer.setLabelsTextSize(22f);
+        renderer.setLegendTextSize(26f);
+        renderer.setMargins(new int[]{80, 120, 220, 40});
+        renderer.setShowGrid(true);
+        renderer.setZoomButtonsVisible(false);
+        renderer.setPanEnabled(true, false);
+
+        renderer.setBarWidth(25);
+        renderer.setBarSpacing(4);
+
+        renderer.setXLabels(0);
+        for (int i = 0; i < labels.size(); i++) {
+            renderer.addXTextLabel(i, labels.get(i));
+        }
+        renderer.setXLabelsAngle(90f);
+        renderer.setXLabelsPadding(150f);
+
+        renderer.setXAxisMin(-0.8);
+        renderer.setXAxisMax(labels.size() - 0.2);
+
+        renderer.setYAxisMin(0);
+        renderer.setYAxisMax(maxY * 1.15);
+        renderer.setYLabelsPadding(40f);
+
+        XYSeriesRenderer topRenderer = new XYSeriesRenderer();
+        topRenderer.setColor(Color.GREEN);
+        topRenderer.setDisplayChartValues(true);
+        topRenderer.setChartValuesTextSize(24f);
+
+        XYSeriesRenderer bottomRenderer = new XYSeriesRenderer();
+        bottomRenderer.setColor(Color.RED);
+        bottomRenderer.setDisplayChartValues(true);
+        bottomRenderer.setChartValuesTextSize(24f);
+
+        renderer.addSeriesRenderer(topRenderer);
+        renderer.addSeriesRenderer(bottomRenderer);
+
+        return ChartFactory.getBarChartView(
+                context,
+                dataset,
+                renderer,
+                BarChart.Type.DEFAULT
+        );
+    }
+
+
+
+    /*public static GraphicalView buildQuery9BinnedCategoryReviewChart(Context context, Cursor cursor) {
 
         int reviewIndex = cursor.getColumnIndex("avg_review_score");
         if (reviewIndex == -1) {
@@ -1260,7 +1517,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
                 renderer,
                 BarChart.Type.DEFAULT
         );
-    }
+    }*/
 
     /**
      * Custom chart for QUERY_10:
@@ -1446,6 +1703,7 @@ public class QueryActivity extends Activity implements View.OnClickListener {
 
     /**
      * Special chart for QUERY_13
+     * Total customers by state
      */
     public static GraphicalView buildQuery13CustomersByStateChart(Context context, Cursor cursor) {
 

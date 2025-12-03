@@ -33,12 +33,10 @@ public class BrowseDataActivity extends Activity implements View.OnClickListener
 
         tableSpinner = findViewById(R.id.tableSpinner);
         showTableBtn = findViewById(R.id.showTableBtn);
-//        summaryBtn = findViewById(R.id.summary_btn);
         tableDisplay = findViewById(R.id.tableDisplay);
         goBackBtn = findViewById(R.id.goback_btn);
 
         showTableBtn.setOnClickListener(this);
-//        summaryBtn.setOnClickListener(this);
         goBackBtn.setOnClickListener(this);
 
         try {
